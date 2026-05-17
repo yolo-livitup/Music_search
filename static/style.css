@@ -1,0 +1,236 @@
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #0f0f12;
+    --surface: #1a1a20;
+    --border: #2a2a35;
+    --text: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --accent: #c4a46c;
+    --accent-hover: #d4b47c;
+    --error: #e5484d;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.7;
+}
+
+.container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Search */
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 14px 18px;
+    font-size: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-box input:focus {
+    border-color: var(--accent);
+}
+
+.search-box input::placeholder {
+    color: #52525b;
+}
+
+.search-box button {
+    padding: 14px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: var(--accent);
+    color: #1a1a20;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.search-box button:hover {
+    background: var(--accent-hover);
+}
+
+.hint {
+    font-size: 0.8rem;
+    color: #52525b;
+    margin-bottom: 32px;
+}
+
+/* Loading */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px 0;
+    color: var(--text-secondary);
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Result */
+.result {
+    margin-top: 32px;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.result-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.result-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Markdown-style content */
+.result-content h1, .result-content h2, .result-content h3 {
+    color: var(--accent);
+    margin: 1.2em 0 0.5em;
+}
+
+.result-content h1:first-child, .result-content h2:first-child, .result-content h3:first-child {
+    margin-top: 0;
+}
+
+.result-content p {
+    margin: 0.6em 0;
+}
+
+.result-content ul, .result-content ol {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+}
+
+.result-content li {
+    margin: 0.25em 0;
+}
+
+.result-content strong {
+    color: #f0f0f0;
+}
+
+.result-content code {
+    background: #2a2a35;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* Error */
+.error {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: rgba(229, 72, 77, 0.1);
+    border: 1px solid var(--error);
+    border-radius: 10px;
+    color: var(--error);
+    font-size: 0.9rem;
+}
+
+/* Buttons */
+.btn-sm {
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    background: var(--border);
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-sm:hover {
+    background: #3a3a45;
+    color: var(--text);
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 32px 16px 48px;
+    }
+
+    .search-box {
+        flex-direction: column;
+    }
+
+    .search-box button {
+        padding: 14px;
+    }
+
+    .result-content {
+        padding: 20px;
+    }
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Search - 音乐学术查询</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Music Search</h1>
+            <p class="subtitle">音乐学档案查询系统 — 输入歌名 / 专辑 / 音乐人</p>
+        </header>
+
+        <div class="search-box">
+            <input
+                type="text"
+                id="queryInput"
+                placeholder="例如：Bohemian Rhapsody、The Dark Side of the Moon、坂本龙一..."
+                autocomplete="off"
+            />
+            <button id="searchBtn">查询</button>
+        </div>
+        <p class="hint">支持歌词解析、专辑档案、人物志三种查询模式</p>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <span>正在检索音乐档案库...</span>
+        </div>
+
+        <div id="result" class="result hidden">
+            <div class="result-header">
+                <h2>查询结果</h2>
+                <button id="copyBtn" class="btn-sm">复制</button>
+            </div>
+            <div id="resultContent" class="result-content markdown-body"></div>
+        </div>
+
+        <div id="error" class="error hidden"></div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
