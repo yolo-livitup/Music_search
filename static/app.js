@@ -12,11 +12,31 @@ function showLoading() {
     error.classList.add("hidden");
 }
 
+function renderContent(text) {
+    // Preprocess: convert ^ prefixed lines to styled translation lines
+    const processed = text
+        .split("\n")
+        .map((line) => {
+            const trimmed = line.trimStart();
+            if (trimmed.startsWith("^ ")) {
+                const indent = line.length - trimmed.length;
+                const spaces = " ".repeat(indent);
+                return spaces + '<span class="lyric-tr">' + trimmed.slice(2) + "</span>";
+            }
+            return line;
+        })
+        .join("\n");
+
+    // Render markdown to HTML
+    const html = marked.parse(processed);
+    resultContent.innerHTML = html;
+}
+
 function showResult(text) {
     loading.classList.add("hidden");
     error.classList.add("hidden");
     result.classList.remove("hidden");
-    resultContent.textContent = text;
+    renderContent(text);
 }
 
 function showError(msg) {
@@ -59,7 +79,14 @@ input.addEventListener("keydown", (e) => {
 
 copyBtn.addEventListener("click", async () => {
     try {
-        await navigator.clipboard.writeText(resultContent.textContent);
+        // Copy raw text (strip HTML)
+        const temp = document.createElement("div");
+        temp.innerHTML = resultContent.innerHTML;
+        // Replace lyric-tr spans back to ^ prefix for plain text copy
+        temp.querySelectorAll(".lyric-tr").forEach((el) => {
+            el.textContent = "^ " + el.textContent;
+        });
+        await navigator.clipboard.writeText(temp.textContent);
         copyBtn.textContent = "已复制";
         setTimeout(() => (copyBtn.textContent = "复制"), 1500);
     } catch {
