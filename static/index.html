@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+    <canvas id="bgCanvas"></canvas>
+
     <div class="container">
         <header>
+            <div class="logo-icon">&#9835;</div>
             <h1>Music Search</h1>
             <p class="subtitle">音乐学档案查询系统 — 输入歌名 / 专辑 / 音乐人</p>
         </header>
@@ -22,16 +25,26 @@
             />
             <button id="searchBtn">查询</button>
         </div>
-        <p class="hint">支持歌词解析、专辑档案、人物志三种查询模式</p>
+        <div class="mode-hints">
+            <span class="mode-tag song">&#9835; 歌词解析</span>
+            <span class="mode-tag album">&#128191; 专辑档案</span>
+            <span class="mode-tag artist">&#127925; 人物志</span>
+        </div>
+        <p class="hint">直接输入歌名、专辑名或音乐人名字，系统会自动识别查询类型</p>
 
         <div id="loading" class="loading hidden">
-            <div class="spinner"></div>
+            <div class="eq-bars">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
             <span>正在检索音乐档案库...</span>
         </div>
 
         <div id="result" class="result hidden">
             <div class="result-header">
-                <h2>查询结果</h2>
+                <div class="result-header-left">
+                    <h2>查询结果</h2>
+                    <span id="modeBadge" class="mode-badge hidden"></span>
+                </div>
                 <button id="copyBtn" class="btn-sm">复制</button>
             </div>
             <div id="resultContent" class="result-content"></div>
