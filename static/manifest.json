@@ -1,0 +1,22 @@
+{
+  "name": "Music Search - 音乐学术查询",
+  "short_name": "Music Search",
+  "description": "歌词解析、专辑档案、音乐人查询 — 基于 AI 的音乐档案系统",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0b10",
+  "theme_color": "#c4a46c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

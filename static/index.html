@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0b10">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Music Search">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
     <title>Music Search - 音乐学术查询</title>
     <link rel="stylesheet" href="/style.css">
 </head>
@@ -20,7 +27,7 @@
             <input
                 type="text"
                 id="queryInput"
-                placeholder="例如：Bohemian Rhapsody、The Dark Side of the Moon、坂本龙一..."
+                placeholder=""
                 autocomplete="off"
             />
             <button id="searchBtn">查询</button>
@@ -30,7 +37,15 @@
             <span class="mode-tag album">&#128191; 专辑档案</span>
             <span class="mode-tag artist">&#127925; 人物志</span>
         </div>
-        <p class="hint">直接输入歌名、专辑名或音乐人名字，系统会自动识别查询类型</p>
+        <p class="hint">输入歌名、专辑名或音乐人名字即可查询。只输歌名自动匹配最热门版本，加歌手名（如"90210 Wale"）可精确查找指定版本 · Esc 清空搜索框</p>
+
+        <div id="history" class="history hidden">
+            <div class="history-header">
+                <span class="history-label">最近搜索</span>
+                <button id="clearHistoryBtn" class="btn-link">清空</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+        </div>
 
         <div id="loading" class="loading hidden">
             <div class="eq-bars">
@@ -47,10 +62,34 @@
                 </div>
                 <button id="copyBtn" class="btn-sm">复制</button>
             </div>
-            <div id="resultContent" class="result-content"></div>
+            <div id="resultContent" class="result-content">
+                <div id="resultSingle" class="result-single"></div>
+                <div id="resultDual" class="result-dual hidden">
+                    <div class="dual-tabs">
+                        <button class="dual-tab active" data-panel="lyrics">歌词</button>
+                        <button class="dual-tab" data-panel="analysis">解析</button>
+                    </div>
+                    <div class="dual-panels">
+                        <div id="lyricsPanel" class="dual-panel lyrics-panel"></div>
+                        <div id="analysisPanel" class="dual-panel analysis-panel"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="error" class="error hidden"></div>
+
+        <div id="recommendations" class="recommendations hidden">
+            <h3 class="rec-title">你可能会喜欢</h3>
+            <div id="recList" class="rec-list"></div>
+        </div>
+
+        <div id="shareBar" class="share-bar hidden">
+            <span class="share-label">分享此结果：</span>
+            <input id="shareUrl" class="share-url" type="text" readonly />
+            <button id="shareCopyBtn" class="btn-sm">复制链接</button>
+            <button id="shareGenBtn" class="btn-sm btn-share">生成分享链接</button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

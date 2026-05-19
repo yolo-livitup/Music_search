@@ -43,9 +43,9 @@ body {
 .container {
     position: relative;
     z-index: 1;
-    max-width: 780px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 80px 24px 96px;
+    padding: 80px 32px 96px;
 }
 
 /* ---- Header ---- */
@@ -179,9 +179,73 @@ h1 {
 .hint {
     font-size: 0.78rem;
     color: var(--text-muted);
-    margin-bottom: 40px;
+    margin-bottom: 12px;
     padding-left: 4px;
     letter-spacing: 0.02em;
+}
+
+/* ---- Search History ---- */
+.history {
+    margin-bottom: 40px;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-left: 4px;
+}
+
+.history-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    padding: 0;
+    transition: color 0.15s;
+}
+
+.btn-link:hover {
+    color: var(--error);
+}
+
+.history-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.history-item {
+    padding: 5px 14px;
+    font-size: 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    backdrop-filter: blur(8px);
+    user-select: none;
+}
+
+.history-item:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
 }
 
 /* ---- Loading ---- */
@@ -273,11 +337,120 @@ h1 {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 32px 36px;
+    padding: 0;
     font-size: 0.925rem;
     color: #c4c4d0;
     backdrop-filter: blur(16px);
     box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* Single panel (album/artist mode) */
+.result-single {
+    padding: 32px 36px;
+}
+
+/* ---- Dual Panel Layout ---- */
+.result-dual {
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    max-height: 700px;
+    min-height: 360px;
+}
+
+/* Tabs (mobile only) */
+.dual-tabs {
+    display: none;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.dual-tab {
+    flex: 1;
+    padding: 12px 0;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    letter-spacing: 0.04em;
+}
+
+.dual-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.dual-tab:hover {
+    color: var(--text-secondary);
+}
+
+/* Panels container */
+.dual-panels {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.dual-panel {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.lyrics-panel {
+    flex: 1;
+    padding: 32px 28px 32px 36px;
+    border-right: 1px solid var(--border-strong);
+}
+
+.analysis-panel {
+    flex: 1;
+    padding: 32px 36px 32px 28px;
+}
+
+/* ---- Responsive: mobile tabs ---- */
+@media (max-width: 768px) {
+    .result-dual {
+        height: auto;
+        max-height: none;
+        min-height: 0;
+    }
+
+    .dual-tabs {
+        display: flex;
+    }
+
+    .dual-panels {
+        flex-direction: column;
+    }
+
+    .dual-panel {
+        display: none;
+        min-height: 0;
+        max-height: none;
+        overflow-y: visible;
+        border-right: none;
+    }
+
+    .dual-panel.active {
+        display: block;
+    }
+
+    .lyrics-panel,
+    .analysis-panel {
+        padding: 20px 18px;
+    }
+
+    .result-content {
+        max-height: none;
+    }
 }
 
 /* ---- Typography ---- */
@@ -404,6 +577,95 @@ h1 {
     color: var(--text-secondary);
 }
 
+/* ---- Recommendations ---- */
+.recommendations {
+    margin-top: 24px;
+}
+
+.rec-title {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    padding-left: 4px;
+}
+
+.rec-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.rec-item {
+    padding: 8px 18px;
+    font-size: 0.84rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s;
+    backdrop-filter: blur(8px);
+    user-select: none;
+}
+
+.rec-item:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+    transform: translateY(-1px);
+}
+
+.rec-item-artist {
+    color: var(--text-muted);
+    font-size: 0.74rem;
+}
+
+/* ---- Share Bar ---- */
+.share-bar {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.share-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.share-url {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    outline: none;
+    backdrop-filter: blur(8px);
+}
+
+.share-url:focus {
+    border-color: var(--accent);
+}
+
+.btn-share {
+    background: var(--accent) !important;
+    color: #1a1a1e !important;
+    border: none !important;
+    font-weight: 600 !important;
+}
+
+.btn-share:hover {
+    background: #d4b87c !important;
+}
+
 /* ---- Utilities ---- */
 .hidden {
     display: none !important;
@@ -423,7 +685,7 @@ h1 {
         padding: 14px;
     }
 
-    .result-content {
+    .result-single {
         padding: 20px 18px;
         font-size: 0.88rem;
     }

@@ -1,3 +1,8 @@
+/* ====== Service Worker ====== */
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js");
+}
+
 /* ====== Animated Background Canvas ====== */
 const canvas = document.getElementById("bgCanvas");
 const ctx = canvas.getContext("2d");
@@ -99,6 +104,68 @@ function animate() {
 
 animate();
 
+/* ====== Search History ====== */
+const history = document.getElementById("history");
+const historyList = document.getElementById("historyList");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+const STORAGE_KEY = "music_search_history";
+const MAX_HISTORY = 10;
+
+function loadHistory() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+        return [];
+    }
+}
+
+function saveHistory(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
+
+function addHistory(query) {
+    const items = loadHistory();
+    const idx = items.indexOf(query);
+    if (idx > -1) items.splice(idx, 1);
+    items.unshift(query);
+    if (items.length > MAX_HISTORY) items.pop();
+    saveHistory(items);
+    renderHistory();
+}
+
+function renderHistory() {
+    const items = loadHistory();
+    if (items.length === 0) {
+        history.classList.add("hidden");
+        return;
+    }
+    history.classList.remove("hidden");
+    historyList.innerHTML = items
+        .map((q) => `<span class="history-item" data-query="${q.replace(/"/g, "&quot;")}">${escapeHtml(q)}</span>`)
+        .join("");
+
+    historyList.querySelectorAll(".history-item").forEach((el) => {
+        el.addEventListener("click", () => {
+            input.value = el.dataset.query;
+            search();
+        });
+    });
+}
+
+function clearHistory() {
+    localStorage.removeItem(STORAGE_KEY);
+    renderHistory();
+}
+
+function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+clearHistoryBtn.addEventListener("click", clearHistory);
+renderHistory();
+
 /* ====== Search Logic ====== */
 const input = document.getElementById("queryInput");
 const searchBtn = document.getElementById("searchBtn");
@@ -121,8 +188,14 @@ function showLoading() {
     error.classList.add("hidden");
 }
 
-function renderContent(text) {
-    const processed = text
+const resultSingle = document.getElementById("resultSingle");
+const resultDual = document.getElementById("resultDual");
+const lyricsPanel = document.getElementById("lyricsPanel");
+const analysisPanel = document.getElementById("analysisPanel");
+const dualTabs = document.querySelectorAll(".dual-tab");
+
+function processLines(text) {
+    return text
         .split("\n")
         .map((line) => {
             const trimmed = line.trimStart();
@@ -133,21 +206,84 @@ function renderContent(text) {
             return line;
         })
         .join("\n");
-
-    resultContent.innerHTML = marked.parse(processed);
 }
+
+function renderSingle(text) {
+    resultSingle.classList.remove("hidden");
+    resultDual.classList.add("hidden");
+    resultSingle.innerHTML = marked.parse(processLines(text));
+}
+
+function renderDual(lyricsMd, analysisMd) {
+    resultSingle.classList.add("hidden");
+    resultDual.classList.remove("hidden");
+    lyricsPanel.innerHTML = marked.parse(processLines(lyricsMd));
+    analysisPanel.innerHTML = marked.parse(processLines(analysisMd));
+    lyricsPanel.scrollTop = 0;
+    analysisPanel.scrollTop = 0;
+    // Reset to lyrics tab on mobile
+    dualTabs.forEach((t) => t.classList.remove("active"));
+    dualTabs[0].classList.add("active");
+    document.querySelectorAll(".dual-panel").forEach((p) => p.classList.remove("active"));
+    lyricsPanel.classList.add("active");
+}
+
+const recommendations = document.getElementById("recommendations");
+const recList = document.getElementById("recList");
+const shareBar = document.getElementById("shareBar");
+const shareUrl = document.getElementById("shareUrl");
+const shareCopyBtn = document.getElementById("shareCopyBtn");
+const shareGenBtn = document.getElementById("shareGenBtn");
+let lastResult = null;
 
 function showResult(text, qtype) {
     loading.classList.add("hidden");
     error.classList.add("hidden");
     result.classList.remove("hidden");
-    renderContent(text);
+    lastResult = { text, qtype };
+
+    const splitIdx = text.indexOf("<!-- split -->");
+    if (splitIdx > -1) {
+        const lyricsMd = text.slice(0, splitIdx).trim();
+        const analysisMd = text.slice(splitIdx + "<!-- split -->".length).trim();
+        renderDual(lyricsMd, analysisMd);
+    } else {
+        renderSingle(text);
+    }
 
     const info = MODE_LABELS[qtype] || { text: "查询", icon: "" };
     modeBadge.textContent = info.icon + " " + info.text;
     modeBadge.classList.remove("hidden");
 
+    // Reset share bar for new search
+    shareUrl.value = "";
+    shareBar.classList.remove("hidden");
+    shareCopyBtn.textContent = "复制链接";
+    shareCopyBtn.style.display = "none";
+    shareGenBtn.style.display = "";
+
     result.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function showRecommendations(recs) {
+    if (!recs || recs.length === 0) {
+        recommendations.classList.add("hidden");
+        return;
+    }
+    recommendations.classList.remove("hidden");
+    recList.innerHTML = recs
+        .map((r) => {
+            const label = r.artist ? `${r.track} <span class="rec-item-artist">${escapeHtml(r.artist)}</span>` : escapeHtml(r.track);
+            return `<span class="rec-item" data-query="${escapeHtml(r.track + (r.artist ? ' ' + r.artist : ''))}">${label}</span>`;
+        })
+        .join("");
+
+    recList.querySelectorAll(".rec-item").forEach((el) => {
+        el.addEventListener("click", () => {
+            input.value = el.dataset.query;
+            search();
+        });
+    });
 }
 
 function showError(msg) {
@@ -178,6 +314,8 @@ async function search() {
         }
 
         showResult(data.result, data.type);
+        showRecommendations(data.recommendations);
+        addHistory(query);
     } catch (err) {
         showError(`网络错误: ${err.message}`);
     }
@@ -186,19 +324,92 @@ async function search() {
 searchBtn.addEventListener("click", search);
 input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") search();
+    if (e.key === "Escape") {
+        input.value = "";
+        input.blur();
+    }
+});
+
+// Global keyboard shortcuts
+document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        input.focus();
+        input.select();
+    }
+    if (e.key === "Escape" && document.activeElement === input) {
+        input.value = "";
+        input.blur();
+    }
+});
+
+// Mobile tab switching
+dualTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+        const target = tab.dataset.panel;
+        dualTabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        document.querySelectorAll(".dual-panel").forEach((p) => p.classList.remove("active"));
+        document.getElementById(target === "lyrics" ? "lyricsPanel" : "analysisPanel").classList.add("active");
+    });
 });
 
 copyBtn.addEventListener("click", async () => {
     try {
-        const temp = document.createElement("div");
-        temp.innerHTML = resultContent.innerHTML;
-        temp.querySelectorAll(".lyric-tr").forEach((el) => {
-            el.textContent = "^ " + el.textContent;
-        });
-        await navigator.clipboard.writeText(temp.textContent);
+        let text;
+        if (resultDual.classList.contains("hidden")) {
+            text = resultSingle.textContent;
+        } else {
+            const l = document.createElement("div");
+            l.innerHTML = lyricsPanel.innerHTML;
+            l.querySelectorAll(".lyric-tr").forEach((el) => {
+                el.textContent = "^ " + el.textContent;
+            });
+            const a = document.createElement("div");
+            a.innerHTML = analysisPanel.innerHTML;
+            text = l.textContent + "\n\n" + a.textContent;
+        }
+        await navigator.clipboard.writeText(text);
         copyBtn.textContent = "已复制";
         setTimeout(() => (copyBtn.textContent = "复制"), 1500);
     } catch {
         copyBtn.textContent = "复制失败";
+    }
+});
+
+// Share button
+shareGenBtn.addEventListener("click", async () => {
+    if (!lastResult) return;
+    shareGenBtn.textContent = "生成中...";
+    shareGenBtn.disabled = true;
+    try {
+        const res = await fetch("/api/share", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: lastResult.text, type: lastResult.qtype }),
+        });
+        const data = await res.json();
+        if (data.url) {
+            const full = window.location.origin + data.url;
+            shareUrl.value = full;
+            shareCopyBtn.style.display = "";
+            shareGenBtn.style.display = "none";
+            shareUrl.select();
+        }
+    } catch (err) {
+        shareGenBtn.textContent = "生成失败";
+    } finally {
+        shareGenBtn.disabled = false;
+        if (shareGenBtn.textContent === "生成中...") shareGenBtn.textContent = "生成分享链接";
+    }
+});
+
+shareCopyBtn.addEventListener("click", async () => {
+    try {
+        await navigator.clipboard.writeText(shareUrl.value);
+        shareCopyBtn.textContent = "已复制";
+        setTimeout(() => (shareCopyBtn.textContent = "复制链接"), 1500);
+    } catch {
+        shareCopyBtn.textContent = "复制失败";
     }
 });
