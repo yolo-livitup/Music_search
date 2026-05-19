@@ -188,12 +188,6 @@ function showLoading() {
     error.classList.add("hidden");
 }
 
-const resultSingle = document.getElementById("resultSingle");
-const resultDual = document.getElementById("resultDual");
-const lyricsPanel = document.getElementById("lyricsPanel");
-const analysisPanel = document.getElementById("analysisPanel");
-const dualTabs = document.querySelectorAll(".dual-tab");
-
 function processLines(text) {
     return text
         .split("\n")
@@ -206,26 +200,6 @@ function processLines(text) {
             return line;
         })
         .join("\n");
-}
-
-function renderSingle(text) {
-    resultSingle.classList.remove("hidden");
-    resultDual.classList.add("hidden");
-    resultSingle.innerHTML = marked.parse(processLines(text));
-}
-
-function renderDual(lyricsMd, analysisMd) {
-    resultSingle.classList.add("hidden");
-    resultDual.classList.remove("hidden");
-    lyricsPanel.innerHTML = marked.parse(processLines(lyricsMd));
-    analysisPanel.innerHTML = marked.parse(processLines(analysisMd));
-    lyricsPanel.scrollTop = 0;
-    analysisPanel.scrollTop = 0;
-    // Reset to lyrics tab on mobile
-    dualTabs.forEach((t) => t.classList.remove("active"));
-    dualTabs[0].classList.add("active");
-    document.querySelectorAll(".dual-panel").forEach((p) => p.classList.remove("active"));
-    lyricsPanel.classList.add("active");
 }
 
 const recommendations = document.getElementById("recommendations");
@@ -246,9 +220,13 @@ function showResult(text, qtype) {
     if (splitIdx > -1) {
         const lyricsMd = text.slice(0, splitIdx).trim();
         const analysisMd = text.slice(splitIdx + "<!-- split -->".length).trim();
-        renderDual(lyricsMd, analysisMd);
+        resultContent.innerHTML =
+            '<div class="result-inner">' +
+            '<div class="lyrics-card">' + marked.parse(processLines(lyricsMd)) + '</div>' +
+            '<div class="analysis-section">' + marked.parse(processLines(analysisMd)) + '</div>' +
+            '</div>';
     } else {
-        renderSingle(text);
+        resultContent.innerHTML = '<div class="result-inner">' + marked.parse(processLines(text)) + '</div>';
     }
 
     const info = MODE_LABELS[qtype] || { text: "查询", icon: "" };
@@ -343,32 +321,9 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
-// Mobile tab switching
-dualTabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-        const target = tab.dataset.panel;
-        dualTabs.forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-        document.querySelectorAll(".dual-panel").forEach((p) => p.classList.remove("active"));
-        document.getElementById(target === "lyrics" ? "lyricsPanel" : "analysisPanel").classList.add("active");
-    });
-});
-
 copyBtn.addEventListener("click", async () => {
     try {
-        let text;
-        if (resultDual.classList.contains("hidden")) {
-            text = resultSingle.textContent;
-        } else {
-            const l = document.createElement("div");
-            l.innerHTML = lyricsPanel.innerHTML;
-            l.querySelectorAll(".lyric-tr").forEach((el) => {
-                el.textContent = "^ " + el.textContent;
-            });
-            const a = document.createElement("div");
-            a.innerHTML = analysisPanel.innerHTML;
-            text = l.textContent + "\n\n" + a.textContent;
-        }
+        const text = resultContent.textContent;
         await navigator.clipboard.writeText(text);
         copyBtn.textContent = "已复制";
         setTimeout(() => (copyBtn.textContent = "复制"), 1500);

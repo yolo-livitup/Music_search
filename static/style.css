@@ -345,112 +345,29 @@ h1 {
     overflow: hidden;
 }
 
-/* Single panel (album/artist mode) */
-.result-single {
+.result-inner {
     padding: 32px 36px;
 }
 
-/* ---- Dual Panel Layout ---- */
-.result-dual {
-    display: flex;
-    flex-direction: column;
-    height: 70vh;
-    max-height: 700px;
-    min-height: 360px;
+/* ---- Lyrics Card ---- */
+.lyrics-card {
+    margin: 0 0 24px;
+    padding: 28px 32px;
+    background: linear-gradient(135deg, rgba(196,164,108,0.06) 0%, rgba(196,164,108,0.02) 100%);
+    border: 1px solid rgba(196,164,108,0.25);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
 }
 
-/* Tabs (mobile only) */
-.dual-tabs {
-    display: none;
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--border);
+.lyrics-card h1:first-child,
+.lyrics-card h2:first-child,
+.lyrics-card h3:first-child {
+    margin-top: 0;
 }
 
-.dual-tab {
-    flex: 1;
-    padding: 12px 0;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-    letter-spacing: 0.04em;
-}
-
-.dual-tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-}
-
-.dual-tab:hover {
-    color: var(--text-secondary);
-}
-
-/* Panels container */
-.dual-panels {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.dual-panel {
-    min-height: 0;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.1) transparent;
-}
-
-.lyrics-panel {
-    flex: 1;
-    padding: 32px 28px 32px 36px;
-    border-right: 1px solid var(--border-strong);
-}
-
-.analysis-panel {
-    flex: 1;
-    padding: 32px 36px 32px 28px;
-}
-
-/* ---- Responsive: mobile tabs ---- */
-@media (max-width: 768px) {
-    .result-dual {
-        height: auto;
-        max-height: none;
-        min-height: 0;
-    }
-
-    .dual-tabs {
-        display: flex;
-    }
-
-    .dual-panels {
-        flex-direction: column;
-    }
-
-    .dual-panel {
-        display: none;
-        min-height: 0;
-        max-height: none;
-        overflow-y: visible;
-        border-right: none;
-    }
-
-    .dual-panel.active {
-        display: block;
-    }
-
-    .lyrics-panel,
-    .analysis-panel {
-        padding: 20px 18px;
-    }
-
-    .result-content {
-        max-height: none;
-    }
+/* ---- Analysis Section ---- */
+.analysis-section {
+    padding-top: 8px;
 }
 
 /* ---- Typography ---- */
@@ -685,7 +602,7 @@ h1 {
         padding: 14px;
     }
 
-    .result-single {
+    .result-inner {
         padding: 20px 18px;
         font-size: 0.88rem;
     }
