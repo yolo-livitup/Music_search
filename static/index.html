@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" style="color-scheme: dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +11,7 @@
     <link rel="apple-touch-icon" href="/icon-192.png">
     <link rel="manifest" href="/manifest.json">
     <title>Music Search - 音乐学术查询</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -18,8 +19,8 @@
 
     <div class="container">
         <header>
-            <div class="logo-icon">&#9835;</div>
-            <h1>Music Search</h1>
+            <div class="logo-icon" aria-hidden="true">&#9835;</div>
+            <h1 translate="no">Music Search</h1>
             <p class="subtitle">音乐学档案查询系统 — 输入歌名 / 专辑 / 音乐人</p>
         </header>
 
@@ -27,7 +28,9 @@
             <input
                 type="text"
                 id="queryInput"
-                placeholder=""
+                name="query"
+                aria-label="搜索歌名、专辑或音乐人"
+                placeholder="输入关键词…"
                 autocomplete="off"
             />
             <button id="searchBtn">查询</button>
@@ -42,16 +45,20 @@
         <div id="history" class="history hidden">
             <div class="history-header">
                 <span class="history-label">最近搜索</span>
-                <button id="clearHistoryBtn" class="btn-link">清空</button>
+                <button id="clearHistoryBtn" class="btn-link" title="清空所有搜索历史">清空</button>
             </div>
             <div id="historyList" class="history-list"></div>
         </div>
 
-        <div id="loading" class="loading hidden">
-            <div class="eq-bars">
-                <span></span><span></span><span></span><span></span><span></span>
+        <div id="loading" class="hidden">
+            <div class="skeleton">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
             </div>
-            <span>正在检索音乐档案库...</span>
         </div>
 
         <div id="result" class="result hidden">

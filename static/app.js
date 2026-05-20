@@ -109,7 +109,9 @@ const history = document.getElementById("history");
 const historyList = document.getElementById("historyList");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 const STORAGE_KEY = "music_search_history";
+const CACHE_KEY = "music_search_cache";
 const MAX_HISTORY = 10;
+const MAX_CACHE = 20;
 
 function loadHistory() {
     try {
@@ -141,7 +143,7 @@ function renderHistory() {
     }
     history.classList.remove("hidden");
     historyList.innerHTML = items
-        .map((q) => `<span class="history-item" data-query="${q.replace(/"/g, "&quot;")}">${escapeHtml(q)}</span>`)
+        .map((q) => `<button class="history-item" data-query="${q.replace(/"/g, "&quot;")}">${escapeHtml(q)}</button>`)
         .join("");
 
     historyList.querySelectorAll(".history-item").forEach((el) => {
@@ -153,8 +155,10 @@ function renderHistory() {
 }
 
 function clearHistory() {
-    localStorage.removeItem(STORAGE_KEY);
-    renderHistory();
+    if (confirm("确定要清空所有搜索历史吗？此操作不可撤销。")) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderHistory();
+    }
 }
 
 function escapeHtml(str) {
@@ -165,6 +169,40 @@ function escapeHtml(str) {
 
 clearHistoryBtn.addEventListener("click", clearHistory);
 renderHistory();
+
+/* ====== Search Cache ====== */
+function loadCache() {
+    try {
+        return JSON.parse(localStorage.getItem(CACHE_KEY)) || {};
+    } catch {
+        return {};
+    }
+}
+
+function saveCache(cache) {
+    const entries = Object.entries(cache);
+    if (entries.length > MAX_CACHE) {
+        const sorted = entries.sort((a, b) => b[1].ts - a[1].ts);
+        cache = Object.fromEntries(sorted.slice(0, MAX_CACHE));
+    }
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+}
+
+function getCached(query) {
+    const cache = loadCache();
+    const key = query.trim().toLowerCase();
+    return cache[key] || null;
+}
+
+function setCached(query, data) {
+    const cache = loadCache();
+    cache[query.trim().toLowerCase()] = { ...data, ts: Date.now() };
+    saveCache(cache);
+}
+
+function clearCache() {
+    localStorage.removeItem(CACHE_KEY);
+}
 
 /* ====== Search Logic ====== */
 const input = document.getElementById("queryInput");
@@ -252,7 +290,7 @@ function showRecommendations(recs) {
     recList.innerHTML = recs
         .map((r) => {
             const label = r.artist ? `${r.track} <span class="rec-item-artist">${escapeHtml(r.artist)}</span>` : escapeHtml(r.track);
-            return `<span class="rec-item" data-query="${escapeHtml(r.track + (r.artist ? ' ' + r.artist : ''))}">${label}</span>`;
+            return `<button class="rec-item" data-query="${escapeHtml(r.track + (r.artist ? ' ' + r.artist : ''))}">${label}</button>`;
         })
         .join("");
 
@@ -275,6 +313,14 @@ async function search() {
     const query = input.value.trim();
     if (!query) return;
 
+    const cached = getCached(query);
+    if (cached) {
+        showResult(cached.result, cached.type);
+        showRecommendations(cached.recommendations);
+        addHistory(query);
+        return;
+    }
+
     showLoading();
 
     try {
@@ -291,11 +337,12 @@ async function search() {
             return;
         }
 
+        setCached(query, { result: data.result, type: data.type, recommendations: data.recommendations });
         showResult(data.result, data.type);
         showRecommendations(data.recommendations);
         addHistory(query);
     } catch (err) {
-        showError(`网络错误: ${err.message}`);
+        showError(`网络错误: ${err.message}。请检查网络连接后重试。`);
     }
 }
 

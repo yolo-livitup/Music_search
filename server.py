@@ -23,6 +23,8 @@ DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
 cc = OpenCC("t2s")
 shared_results = {}
+search_cache = {}
+MAX_CACHE = 50
 
 
 def is_chinese(text):
@@ -259,6 +261,10 @@ def search():
     if not query:
         return jsonify({"error": "查询内容不能为空"}), 400
 
+    cache_key = query.strip().lower()
+    if cache_key in search_cache:
+        return jsonify(search_cache[cache_key])
+
     # Step 1: classify the query
     qtype = classify_query(query)
 
@@ -293,12 +299,16 @@ def search():
         )
         result = response.choices[0].message.content
         recs = get_recommendations(query, qtype)
-        return jsonify({
+        response_data = {
             "result": result,
             "recommendations": recs,
             "hasLyrics": has_lyrics,
             "type": qtype,
-        })
+        }
+        if len(search_cache) >= MAX_CACHE:
+            search_cache.pop(next(iter(search_cache)))
+        search_cache[cache_key] = response_data
+        return jsonify(response_data)
     except Exception as e:
         return jsonify({"error": f"API 请求失败: {str(e)}"}), 500
 
